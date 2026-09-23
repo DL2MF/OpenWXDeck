@@ -1,27 +1,35 @@
-# OpenWX <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons/icons/wifi.svg" width="26"> Deck
+# <h1 align="center">OpenWX ((•)) Deck</h1>
 
-**OpenWXDeck** is handheld weather-radiosonde receiver firmware for the
+![](https://img.shields.io/badge/OpenWX-((%E2%80%A2))_Deck-4AA6FF?style=for-the-badge&labelColor=0D1117)
+
+**OpenWX <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons/icons/broadcast.svg" height="22"> Deck** is handheld weather-radiosonde receiver firmware for the
 **LilyGO T-Deck Plus**. It uses the onboard **SX1262** radio to receive radiosonde
 frames, decodes telemetry on-device, shows recovery and navigation information on the
 TFT, logs to microSD, and serves a phone-friendly web panel over Wi-Fi.
 
 
-<img width="325" height="246" alt="grafik" src="https://github.com/user-attachments/assets/969cc73b-ad3d-4b27-be5a-e14527215637" />
-
 <img width="325" height="246" alt="Screenshot 2026-09-22 203002" src="https://github.com/user-attachments/assets/14f1dc5a-aa8e-422a-8a9c-2303e9efff87" />
 
-<img width="330" height="248" alt="Screenshot 2026-09-22 143357" src="https://github.com/user-attachments/assets/41802b22-87e2-44be-b1c0-e82e3fdf4d69" />
+<img width="325" height="246" alt="grafik" src="https://github.com/user-attachments/assets/969cc73b-ad3d-4b27-be5a-e14527215637" />
 
 <img width="330" height="252" alt="Screenshot 2026-09-21 054835" src="https://github.com/user-attachments/assets/469667f0-ce46-4aa9-a2c3-019e754b0e1b" />
+
+<img width="329" height="248" alt="grafik" src="https://github.com/user-attachments/assets/1bf84436-097d-46f5-8608-d85fe20b6abd" />
+
+<img width="330" height="248" alt="Screenshot 2026-09-22 143357" src="https://github.com/user-attachments/assets/41802b22-87e2-44be-b1c0-e82e3fdf4d69" />
 
 <img width="327" height="248" alt="Screenshot 2026-09-20 131117" src="https://github.com/user-attachments/assets/a41f1f39-4bbf-46de-a6ce-cd980cc4e2c1" />
 
 <img width="325" height="245" alt="grafik" src="https://github.com/user-attachments/assets/be895415-00b5-4302-948e-3d5819d88245" />
 
+<img width="325" height="243" alt="grafik" src="https://github.com/user-attachments/assets/de954f3f-1d3d-4fc5-a787-7eb1e7c75a99" />
+
+<img width="331" height="246" alt="grafik" src="https://github.com/user-attachments/assets/13baa87c-af4b-4a26-a048-43132f93b09d" />
 
 
-OpenWXDeck is the handheld member of the **OpenWX** family (alongside
-[OpenWXSDR](https://github.com/DL2MF/OpenWXSDR) and the OpenWX MQTT frontend).
+##
+OpenWX <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons/icons/broadcast.svg" height="20"> Deck is the handheld member of the **OpenWX** family (alongside
+[OpenWXSDR](https://github.com/DL2MF/OpenWXSDR), [OpenWXTTGO](https://github.com/DL2MF/OpenWXTTGO), [OpenWX Fleet-Monitor](https://github.com/DL2MF/OpenWX-Fleet-Monitor) and the [OpenWX MQTT](http://mqtt.openwx.de/) frontend.
 
 - **Version:** v1.0.6 (`src/config/version.h`)
 - **Licence:** GPL-3.0-or-later
@@ -98,25 +106,29 @@ All decoders are based on the reliable OpenWXTTGO / rdzTTGO / rs1729 decoders fo
 **Device**
 
 - OpenWXDeck support several screen templates and layouts, including a tactical view
-- 12 TFT pages behind a 4×2 Home grid, touch or keyboard driven
+- Two menu screens, 16 pages behind a 4×2 Home grid, touch or keyboard driven
 - microSD logging of tracks, per-sonde summaries and a last-seen record
-- Wi-Fi STA with credentials editable on-device
+- Wi-Fi with credentials editable on-device
 - Battery percentage, screen/keyboard brightness, auto-dim, touch enable
 
 **Bluetooth BLE support**
 
-- Full compatibility with MySondy BT protocol supporting these mobile device apps:
-  - MySondyGo 3.x, 4.x
-  - TrovaLaSonda
-  - Sonde Hunter
+- Full compatibility with MySondy BT protocol 4.1 supporting these mobile device apps:
+  - [MySondyGo 3.x, 4.x](https://mysondy.altervista.org/mysondygo.php) - Mirko Dalmonte, IZ4PNN
+  - [TrovaLaSonda 2.0.0.68](https://play.google.com/store/apps/details?id=eu.ydiaeresis.trovalasonda&hl=de) -  Maurizio Butti
+  - [Hunter Tracker](https://huntertracker.eu/in3isu/) - Giovanni, IN3ISU
 
-You can use each of these app with firmware.
+You can use each of these apps with this firmware, simply enable BT BLE on the device.
 
 **Gateway Web panel**
 
 - OpenWXDeck provides an integrated, fully featured web panel with controls if you want to operate a T-Deck at home or remote
 
 <img width="1458" height="890" alt="grafik" src="https://github.com/user-attachments/assets/fcd2e53b-e52c-4283-b51b-1684deec9e89" />
+
+- Providing a dedicated dashboard view, livemap and screen mirroring of the T-Deck live screen
+
+- <img width="1230" height="1099" alt="grafik" src="https://github.com/user-attachments/assets/1b6ad601-6816-4837-bde3-3239fb383b91" />
 
 - Configuration settings, decoder options, device settings like display brightness, timeout and much more are available
 - An integrated filemanager handles up and download of frequency list, temporary logfiles and lastheard sondes also withour an SDcard
@@ -318,7 +330,7 @@ permission where required.
 
 ## Credits and licence
 
-OpenWXDeck builds on the radiosonde decoding work of:
+OpenWX <img src="https://cdn.jsdelivr.net/npm/bootstrap-icons/icons/broadcast.svg" height="20"> Deck builds on the radiosonde decoding work of:
 
 [rs1729/RS](https://github.com/rs1729/RS)
 
@@ -327,6 +339,12 @@ OpenWXDeck builds on the radiosonde decoding work of:
 [DL2MF/OpenWXTTGO](https://github.com/DL2MF/OpenWXTTGO)
 
 [A-DECK SondeDeck](https://github.com/aarondrew313/SondeDeck)
+
+with Reed–Solomon and geodesy from Christian Rabler's dxlAPRS. `THIRD_PARTY.md`
+has the details and the licences.
+
+<img width="330" height="246" alt="grafik" src="https://github.com/user-attachments/assets/ac673672-4013-45d3-8642-3b57c979d85e" />
+
 
 OpenWXDeck is not affiliated with or endorsed by SondeHub.
 
