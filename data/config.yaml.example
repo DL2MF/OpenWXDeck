@@ -1,0 +1,228 @@
+# OpenWXDeck configuration - EXAMPLE / TEMPLATE
+#
+# Copy this to data/config.yaml and fill in your own station identity and
+# broker credentials. config.yaml itself is gitignored, so your credentials
+# never get committed:
+#
+#   cp data/config.yaml.example data/config.yaml
+#
+# Read from the LittleFS filesystem at boot. Flash it with the rest of data/:
+#
+#   pio run -t uploadfs
+#
+# Section names and keys follow OpenWXSDR's config.yaml so one set of station
+# settings describes the same station on either receiver. Keys a handheld
+# cannot act on are simply left out; keys the handheld cannot act on YET are
+# present and parsed, so the uploaders find them ready when they land.
+#
+# This file holds broker credentials, so the web server never serves it. The
+# panel reads the safe subset from /api/config instead.
+
+# ============================================================
+# Station identity
+# ============================================================
+station:
+  callsign: 'N0CALL-12'        # Callsign, optional -1..-15 SSID for the gateway
+  lat: 50.12345                # Decimal degrees, north positive
+  lon: 8.98765                # Decimal degrees, east positive
+  alt: 59                      # Metres above sea level
+  upload_position: true        # Publish the listener position to the networks
+  receiver: 'LilyGO T-Deck Plus / SX1262'
+  antenna: '1/4 wave UHF vertical'
+  upload_interval: 15          # Gateway status interval in minutes
+
+  # lat/lon/alt are the home position: the LiveMap home button centres on
+  # them, and they stand in for the receiver position whenever the local GPS
+  # has no fix.
+
+# ============================================================
+# Anonymous installation counter
+# ============================================================
+# Sends only a random install id, the OpenWXDeck version and the radio type,
+# once every interval_hours. Never the callsign, the position, or any
+# credential from this file. Set enabled: false to opt out completely.
+telemetry:
+  enabled: true
+  interval_hours: 24
+
+# ============================================================
+# Decoders
+# ============================================================
+# The SX1262 holds one modulation and one sync word at a time, so enabling a
+# family adds a radio profile to the scan rather than running it in parallel.
+# Each enabled family costs one dwell per channel, so turn off what does not
+# fly in your area.
+decoders:
+  rs41: true                   # Vaisala RS41 / RS41-SGP (OpenWXTTGO decoder)
+  rs92: false                  # Vaisala RS92 (needs ephemeris, see below)
+  rs92_alt2d: 480              # RS92: altitude in metres assumed for a 2D fix
+                               # when only three satellites are in the frame
+  rs92_rx_bandwidth: 12500     # RS92: receive bandwidth in Hz
+  dfm: true                    # Graw DFM-06 / DFM-09 / DFM-17
+  m10: false                   # Meteomodem M10 (one profile hears M10 and M20)
+  m20: false                   # Meteomodem M20
+  scan_squelch_db: 6           # Scan: skip a channel within this many dB of
+                               # the noise floor without trying decoders (0 off)
+  rx_boost: true               # SX1262 RX gain: true boosted, false power saving
+  dwell_ms: 1400               # Listening time per family per channel
+  signal_lost_ms: 10000        # Silence after which a locked sonde is lost
+  resume_scan: true            # Hand a channel back to the scan once the
+                               # sonde on it has gone quiet. Off keeps the
+                               # receiver where it is until you move it.
+  max_idle_time: 300           # Seconds without frames before an auto-detected
+                               # decoder stops and returns to scanning
+  manual_idle_time: 1800       # Seconds without frames before a manual or
+                               # imported "decode until lost" decoder gives up
+
+# Broadcast GPS ephemeris, for the RS92 decoder only.
+#
+# An RS92 sends the GPS pseudoranges it measures, not a position, so the
+# receiver has to know where the satellites were. The daily RINEX navigation
+# file is fetched over HTTPS once Wi-Fi is up and unpacked into /brdc in the
+# flash filesystem.
+#
+# url is a printf template, the same shape OpenWXTTGO's "ephftp" has. It is
+# given three numbers, in this order, and may use each once:
+#
+#   %04d  the year          %03d  the day of the year     %02d  the year, two digits
+#
+# Anything else in it - %s, %n, a fourth number - is refused and no fetch is
+# made, because the file is read again after a reboot.
+ephemeris:
+  enabled: true                # Fetch when RS92 is on and Wi-Fi is up
+  url: "https://gssc.esa.int/gnss/data/daily/%04d/brdc/brdc%03d0.%02dn.gz"
+  max_age_hours: 6             # Fetch again when the stored file is older
+
+# ============================================================
+# Logging
+# ============================================================
+logging:
+  level: 'INFO'                # DEBUG, INFO, WARNING, ERROR
+  sd_enabled: true             # Write decoded frames to the SD card
+  raw_frames: false            # Also log the raw captured bytes (large)
+  debug_radio: false           # Verbose SX1262 and decoder tracing
+
+# ============================================================
+# Web panel
+# ============================================================
+webui:
+  enabled: true
+  port: 80
+  background: false            # Web server alongside the screens (the WEB
+                               # button switches it; hold WEB for Remote only)
+  user: admin                  # Basic Auth for settings, control and uploads
+  password: ''                 # empty: no password asked
+  sonde_retention_time: 3600   # Seconds a sonde stays on the LiveMap
+  sonde_stale_time: 1800       # Seconds after the last frame before its track
+                               # goes stale (marker and label change)
+  permanent_labels: true       # LiveMap labels every sonde permanently (false:
+                               # the label appears on hover)
+  receiver_color: blue         # Receiver view dial: blue, yellow, tactical, icom,
+                               # r9500, ts890, rs, atak, d75
+  boot_receiver: off           # Start in that receiver view: off, or blue/.../atak/d75
+  map:
+    default_zoom: 11
+    tile_server: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+    sd_root: '/map'            # Tiles for the device's own Map page, on the SD
+                               # card as <sd_root>/<zoom>/<x>/<y>.png. Square
+                               # PNG, 256 or 512 px, up to 8 bits per channel
+                               # and not interlaced - what the meshtastic map
+                               # script writes, and what MapTiler exports when
+                               # 16-bit and interlacing are off. A tile the
+                               # decoder cannot take is skipped and the reason
+                               # shown on the Map page.
+
+# ============================================================
+# Display - the T-Deck's own panel and keyboard light
+# ============================================================
+# Applied at once when changed from the web panel's Configuration dialogue.
+# The on-device screen and keyboard keys still step through their levels.
+display:
+  brightness: 75               # Screen brightness in percent (5..100)
+  keyboard: 0                  # Keyboard light in percent (0 off..100)
+  dim_enabled: false           # Dim the screen when idle
+  dim_after_s: 60              # Seconds without a key or touch before dimming
+  dim_level: 12                # Dimmed brightness in percent
+  homepage_style: standard     # Home menus: standard, icom (an ICOM's MENU and
+                               # FUNCTION keys) or d75 (a Kenwood TH-D75's menu)
+
+# ============================================================
+# Bluetooth (MySondy Go, BLE)
+# ============================================================
+# Serves the MySondy Go v4.1 protocol over BLE, so the MySondy and Trova la
+# Sonda apps can see this receiver and retune it. Takes effect on the next
+# reboot: the Bluetooth controller's memory is claimed at boot.
+bluetooth:
+  enabled: false               # BLE service on or off
+  call: ''                     # MYCALL the app shows, max 8 chars (empty: station callsign)
+  name: ''                     # Advertised name (empty: MySondyGO-<chip id>)
+
+# ============================================================
+# Speaker
+# ============================================================
+# The SX1262 has no audio output, so the speaker plays a signal tone (beeps
+# rising in pitch and rate with the live signal level) and each captured
+# frame as two-tone FSK. Switched on and off on the Channel page.
+audio:
+  output: false                # Speaker on at boot
+  signal_tone: true            # The two-tone signal strength beep between
+                               # frames. Off leaves the speaker for the
+                               # frames themselves.
+  volume: 5                    # 0..10
+
+# ============================================================
+# OpenWX gateway upload
+# ============================================================
+openwx:
+  mqtt:
+    enabled: false
+    server: 'mqtt.openwx.de'
+    port: 1883                 # 1883 plain, 8883 TLS
+    username: ''
+    password: ''
+    topic_prefix: 'OPENWXDECK/N0CALL-12'
+    client_id: 'N0CALL-12'
+    keepalive: 60
+    tls_enabled: false
+
+  http:
+    enabled: false
+    url: 'http://yoururl/upload.php'
+    api_key: ''
+
+# ============================================================
+# SondeHub upload
+# ============================================================
+sondehub:
+  # true uploads, false is off, and 'json' builds exactly the same payloads
+  # and appends them to /sondehub/<serial>.json on the SD card instead.
+  enabled: false
+  queue_mode: true             # Batch uploads; false uploads every frame
+  queue_batch_max: 50
+  queue_max_size: 200
+  upload_url: 'https://api.v2.sondehub.org/sondes/telemetry'
+  listeners_url: 'https://api.v2.sondehub.org/listeners'
+  station_id: 'N0CALL-12'
+  uploader_callsign: 'N0CALL-12'
+  uploader_antenna: '1/4 wave UHF vertical'
+  uploader_radio: 'LilyGO T-Deck Plus / SX1262'
+  contact_email: ''
+  uploader_lat: 52.61083       # Must match station.lat
+  uploader_lon: 10.28283       # Must match station.lon
+  uploader_alt: 59             # Must match station.alt
+  upload_rate_s: 30
+  listener_upload_interval_s: 900
+
+# ============================================================
+# Import API - nearby sondes to check first
+# ============================================================
+import_api:
+  enabled: false
+  url: 'api.opnwx.de'
+  check_interval_s: 300
+  lat: 50.12345
+  lon: 8.98765
+  distance_km: 200
+  time_range_minutes: 30
+  sonde_type: 'all'
+  max_sondes: 3

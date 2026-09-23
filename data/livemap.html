@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenWXDeck LiveMap</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="livemap.css?v=7">
+</head>
+<body>
+
+<svg style="display:none" aria-hidden="true">
+  <symbol id="ic-chart" viewBox="0 0 16 16"><path d="M0 0h1.5v14.5H16V16H0V0Zm15.3 2.6-4.6 5.6-3-2.6-4 4.8-1.1-1 5-6 3 2.7 4.5-5.5 1.2 1Z"/></symbol>
+  <symbol id="ic-rss" viewBox="0 0 16 16"><path d="M2 13.5a1.7 1.7 0 1 0 3.4 0 1.7 1.7 0 0 0-3.4 0ZM2 6.5V9c3.3 0 6 2.7 6 6h2.5C10.5 10.3 6.7 6.5 2 6.5ZM2 1v2.5c6.4 0 11.5 5.1 11.5 11.5H16C16 7.3 9.7 1 2 1Z"/></symbol>
+  <symbol id="ic-history" viewBox="0 0 16 16"><path d="M8 1a7 7 0 1 0 6.9 8.2l-1.6-.3A5.4 5.4 0 1 1 8 2.6c1.6 0 3 .7 4 1.8L9.5 6.9H15V1.4l-1.9 1.9A7 7 0 0 0 8 1Zm-.8 3.2v4.3l3.6 2.1.8-1.3-2.8-1.7V4.2H7.2Z"/></symbol>
+  <symbol id="ic-heart" viewBox="0 0 16 16"><path d="M8 14.5 6.9 13.5C2.9 9.9.3 7.5.3 4.6.3 2.4 2 .8 4.1.8c1.2 0 2.4.6 3.1 1.5l.8 1 .8-1A4 4 0 0 1 11.9.8c2.1 0 3.8 1.6 3.8 3.8 0 2.9-2.6 5.3-6.6 8.9L8 14.5Z"/></symbol>
+  <symbol id="ic-down" viewBox="0 0 16 16"><path d="M7 1h2v9.6l3.3-3.3 1.4 1.4L8 14.4 2.3 8.7l1.4-1.4L7 10.6V1Z"/></symbol>
+  <symbol id="ic-up" viewBox="0 0 16 16"><path d="M9 15H7V5.4L3.7 8.7 2.3 7.3 8 1.6l5.7 5.7-1.4 1.4L9 5.4V15Z"/></symbol>
+  <symbol id="ic-speed" viewBox="0 0 16 16"><path d="M8 1a7 7 0 0 0-6 10.6l1.4-.9A5.4 5.4 0 1 1 13 10.7l1.4.9A7 7 0 0 0 8 1Zm3.3 3.3L7.4 7.4a1.2 1.2 0 1 0 1.2 1.3l2.7-4.4ZM2 13h12v1.6H2V13Z"/></symbol>
+  <symbol id="ic-pin" viewBox="0 0 16 16"><path d="M8 0a5 5 0 0 0-5 5c0 4.1 4.4 10.4 4.6 10.7a.5.5 0 0 0 .8 0C8.6 15.4 13 9.1 13 5a5 5 0 0 0-5-5Zm0 7.5A2.5 2.5 0 1 1 8 2.5a2.5 2.5 0 0 1 0 5Z"/></symbol>
+  <symbol id="ic-hash" viewBox="0 0 16 16"><path d="M5.7 0 5 4H1.4l-.2 1.6h3.6L4.2 10H.7l-.2 1.6h3.5L3.4 16H5l.6-4.4h4.2L9.2 16h1.6l.6-4.4h3.4l.2-1.6h-3.4l.6-4.4H16L16.2 4h-3.6l.6-4h-1.6l-.6 4H6.8l.6-4H5.7ZM6.6 5.6h4.2L10.2 10H6L6.6 5.6Z"/></symbol>
+  <symbol id="ic-clock" viewBox="0 0 16 16"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0Zm0 14.4A6.4 6.4 0 1 1 8 1.6a6.4 6.4 0 0 1 0 12.8ZM8.8 4H7.2v4.8l3.8 2.3.8-1.3-3-1.8V4Z"/></symbol>
+  <symbol id="ic-cross" viewBox="0 0 16 16"><path d="M7.2 0h1.6v3.3a4.8 4.8 0 0 1 3.9 3.9H16v1.6h-3.3a4.8 4.8 0 0 1-3.9 3.9V16H7.2v-3.3a4.8 4.8 0 0 1-3.9-3.9H0V7.2h3.3a4.8 4.8 0 0 1 3.9-3.9V0ZM8 4.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4Z"/></symbol>
+  <symbol id="ic-server" viewBox="0 0 16 16"><path d="M1 1h14v5H1V1Zm1.6 1.6v1.8h1.8V2.6H2.6ZM1 10h14v5H1v-5Zm1.6 1.6v1.8h1.8v-1.8H2.6Z"/></symbol>
+  <symbol id="ic-sat" viewBox="0 0 16 16"><path d="M8 5.6a2.4 2.4 0 1 0 0 4.8 2.4 2.4 0 0 0 0-4.8ZM8 0a8 8 0 0 0-8 8h1.8A6.2 6.2 0 0 1 8 1.8V0Zm0 3.2A4.8 4.8 0 0 0 3.2 8H5A3 3 0 0 1 8 5V3.2Z"/></symbol>
+  <symbol id="ic-cog" viewBox="0 0 16 16"><path d="M8 5.1a2.9 2.9 0 1 0 0 5.8 2.9 2.9 0 0 0 0-5.8Zm6.9 4.3 1.5 1.2-1.5 2.6-1.8-.6a6.6 6.6 0 0 1-1.7 1l-.4 1.9H6.9l-.4-1.9a6.6 6.6 0 0 1-1.7-1l-1.8.6L1.6 10.6l1.5-1.2a6.7 6.7 0 0 1 0-2L1.6 6.2l1.4-2.6 1.8.6a6.6 6.6 0 0 1 1.7-1L6.9.3h3.1l.4 1.9c.6.2 1.2.6 1.7 1l1.8-.6 1.5 2.6-1.5 1.2a6.7 6.7 0 0 1 0 2Z"/></symbol>
+  <symbol id="ic-sliders" viewBox="0 0 16 16"><path d="M0 2.4h7.2v1.6H0V2.4Zm10.4 0H16v1.6h-5.6V2.4ZM8 .8a2.4 2.4 0 1 1 0 4.8 2.4 2.4 0 0 1 0-4.8ZM0 12h5.6v1.6H0V12Zm8.8 0H16v1.6H8.8V12ZM7.2 10.4a2.4 2.4 0 1 1 0 4.8 2.4 2.4 0 0 1 0-4.8Z"/></symbol>
+  <symbol id="ic-search" viewBox="0 0 16 16"><path d="M6.6 0a6.6 6.6 0 1 0 4.1 11.8l3.8 3.8 1.2-1.2-3.8-3.8A6.6 6.6 0 0 0 6.6 0Zm0 1.8a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6Z"/></symbol>
+  <symbol id="ic-gauge" viewBox="0 0 16 16"><path d="M8 1.6A7.2 7.2 0 0 0 1.6 12.3l1.5-.9a5.5 5.5 0 1 1 9.8 0l1.5.9A7.2 7.2 0 0 0 8 1.6Zm3.3 3.1L8.1 9.2a1.2 1.2 0 1 0 1.1 1.2l2.1-5.7ZM2 13.3h12v1.5H2v-1.5Z"/></symbol>
+  <symbol id="ic-file" viewBox="0 0 16 16"><path d="M9.3 0H3.2A1.6 1.6 0 0 0 1.6 1.6v12.8A1.6 1.6 0 0 0 3.2 16h9.6a1.6 1.6 0 0 0 1.6-1.6V4.8L9.3 0Zm-.1 5.5V1.5l3.9 4h-3.9ZM4.4 8h7.2v1.5H4.4V8Zm0 3.2h7.2v1.5H4.4v-1.5Z"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 16 16"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0Zm.9 12.4H7.1V6.9h1.8v5.5Zm0-6.9H7.1V3.6h1.8v1.9Z"/></symbol>
+  <symbol id="ic-check" viewBox="0 0 16 16"><path d="M6.1 13.1 0 7l1.7-1.7 4.4 4.4L14.3.9 16 2.6 6.1 13.1Z"/></symbol>
+  <symbol id="ic-trash" viewBox="0 0 16 16"><path d="M6.2 0h3.6l.6 1.2H15v1.6H1V1.2h4.6L6.2 0ZM2.6 4.4h10.8l-.8 10.1A1.6 1.6 0 0 1 11 16H5a1.6 1.6 0 0 1-1.6-1.5L2.6 4.4Zm3.1 1.9.3 7.3h1.2l-.3-7.3H5.7Zm3.3 0-.3 7.3h1.2l.3-7.3H9Z"/></symbol>
+  <symbol id="ic-zoom" viewBox="0 0 16 16"><path d="M6.6 0a6.6 6.6 0 1 0 4.1 11.8l3.8 3.8 1.2-1.2-3.8-3.8A6.6 6.6 0 0 0 6.6 0Zm0 1.8a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6Zm-.8 2.1v1.9H3.9v1.6h1.9v1.9h1.6V7.4h1.9V5.8H7.4V3.9H5.8Z"/></symbol>
+  <symbol id="ic-pulse" viewBox="0 0 16 16"><path d="M6.1 0 4 8.2 2.9 5.6H0v1.6h1.8l2.4 5.6L6.4 4.3l2.3 9.3 2.1-6.4H16V5.6h-6.6l-1 3.1L6.1 0Z"/></symbol>
+  <symbol id="ic-home" viewBox="0 0 16 16"><path d="M8 .9 0 8.1l1.1 1.2L2.5 8v6.6h4.2v-4.2h2.6v4.2h4.2V8l1.4 1.3L16 8.1 8 .9Z"/></symbol>
+  <symbol id="ic-dots" viewBox="0 0 16 16"><path d="M8 1.6a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4Zm0 4.7a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4Zm0 4.7a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4Z"/></symbol>
+  <symbol id="ic-calendar" viewBox="0 0 16 16"><path d="M4.5 0v1.6H2.4A2.4 2.4 0 0 0 0 4v9.6A2.4 2.4 0 0 0 2.4 16h11.2A2.4 2.4 0 0 0 16 13.6V4a2.4 2.4 0 0 0-2.4-2.4h-2.1V0H9.9v1.6H6.1V0H4.5ZM1.6 6.1h12.8v7.5c0 .5-.4.8-.8.8H2.4a.8.8 0 0 1-.8-.8V6.1Z"/></symbol>
+  <symbol id="ic-list" viewBox="0 0 16 16"><path d="M0 1.6h3.2v3.2H0V1.6Zm4.8.6H16v2H4.8v-2ZM0 6.4h3.2v3.2H0V6.4Zm4.8.6H16v2H4.8V7ZM0 11.2h3.2v3.2H0v-3.2Zm4.8.6H16v2H4.8v-2Z"/></symbol>
+  <symbol id="ic-bt" viewBox="0 0 16 16"><path d="M7.2 0v6.1L4.4 3.3 3.3 4.4 6.9 8l-3.6 3.6 1.1 1.1 2.8-2.8V16h.8l4.6-4.6L8.4 8l3.2-3.4L7 0h.2Zm1.6 2.7 1.3 1.3-1.3 1.3V2.7Zm0 7.9 1.3 1.3-1.3 1.3v-2.6Z"/></symbol>
+  <symbol id="ic-display" viewBox="0 0 16 16"><path d="M0 2.4A1.6 1.6 0 0 1 1.6.8h12.8A1.6 1.6 0 0 1 16 2.4v8.8a1.6 1.6 0 0 1-1.6 1.6H9.6v1.6h2.4V16H4v-1.6h2.4v-1.6H1.6A1.6 1.6 0 0 1 0 11.2V2.4Zm1.6 0v8.8h12.8V2.4H1.6Z"/></symbol>
+  <symbol id="ic-globe" viewBox="0 0 16 16"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0Zm5.9 7.2h-2.5a12 12 0 0 0-1.1-5 6.4 6.4 0 0 1 3.6 5ZM8 1.7c.8 1 1.6 3 1.8 5.5H6.2C6.4 4.7 7.2 2.7 8 1.7Zm-2.3.5a12 12 0 0 0-1.1 5H2.1a6.4 6.4 0 0 1 3.6-5ZM2.1 8.8h2.5a12 12 0 0 0 1.1 5 6.4 6.4 0 0 1-3.6-5ZM8 14.3c-.8-1-1.6-3-1.8-5.5h3.6c-.2 2.5-1 4.5-1.8 5.5Zm2.3-.5a12 12 0 0 0 1.1-5h2.5a6.4 6.4 0 0 1-3.6 5Z"/></symbol>
+  <symbol id="ic-cpu" viewBox="0 0 16 16"><path d="M5 0h1.6v2h2.8V0H11v2h1.4A1.6 1.6 0 0 1 14 3.6V5h2v1.6h-2v2.8h2V11h-2v1.4a1.6 1.6 0 0 1-1.6 1.6H11v2H9.4v-2H6.6v2H5v-2H3.6A1.6 1.6 0 0 1 2 12.4V11H0V9.4h2V6.6H0V5h2V3.6A1.6 1.6 0 0 1 3.6 2H5V0ZM3.6 3.6v8.8h8.8V3.6H3.6Zm2 2h4.8v4.8H5.6V5.6Z"/></symbol>
+  <symbol id="ic-power" viewBox="0 0 16 16"><path d="M7.2 0h1.6v7.7H7.2V0ZM3.6 2.2l1 1.3a5.4 5.4 0 1 0 6.8 0l1-1.3a7 7 0 1 1-8.8 0Z"/></symbol>
+  <symbol id="ic-arrow" viewBox="0 0 16 16"><path d="M8 0 3 15l5-3.5L13 15 8 0Z"/></symbol>
+</svg>
+
+<nav class="owx-navbar">
+  <span class="navbar-brand">
+    <span class="openwx-open">Open</span><span class="openwx-wx">WX</span>
+    <span class="openwx-mark">
+      <svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3ZM4.1 3.9 3 2.8a7.4 7.4 0 0 0 0 10.4l1.1-1.1a5.8 5.8 0 0 1 0-8.2Zm7.8 0a5.8 5.8 0 0 1 0 8.2l1.1 1.1a7.4 7.4 0 0 0 0-10.4l-1.1 1.1ZM6 5.8 4.9 4.7a4.7 4.7 0 0 0 0 6.6L6 10.2a3.1 3.1 0 0 1 0-4.4Zm4 0a3.1 3.1 0 0 1 0 4.4l1.1 1.1a4.7 4.7 0 0 0 0-6.6L10 5.8Z"/></svg>
+    </span>
+    <span class="openwx-open">Deck</span>
+  </span>
+  <div class="navbar-btns">
+    <div class="owx-dd">
+      <button class="btn-owx menu-btn-green" type="button" id="navMenu">
+        <svg class="i"><use href="#ic-cog"></use></svg> Menu <span class="caret"></span>
+      </button>
+      <div class="owx-dd-menu" id="ddMenu">
+        <a href="#" data-act="freq"><svg class="i"><use href="#ic-rss"></use></svg>Enter Frequency</a>
+        <a href="#" data-act="channels"><svg class="i"><use href="#ic-list"></use></svg>Fixed Channels</a>
+        <a href="#" data-act="scan"><svg class="i"><use href="#ic-search"></use></svg><span id="scanItem">Start Scanning</span></a>
+        <a href="#" data-act="spectrum"><svg class="i"><use href="#ic-chart"></use></svg>Show Spectrum</a>
+      </div>
+    </div>
+    <div class="owx-dd">
+      <button class="btn-owx btn-owx-info" type="button" id="navSystem">
+        <svg class="i"><use href="#ic-sliders"></use></svg> System <span class="caret"></span>
+      </button>
+      <div class="owx-dd-menu" id="ddSystem">
+        <a href="index.html"><svg class="i"><use href="#ic-gauge"></use></svg>System Dashboard</a>
+        <a href="#" data-act="config:general"><svg class="i"><use href="#ic-cog"></use></svg>Configuration</a>
+        <a href="#" data-act="config:receiver"><svg class="i"><use href="#ic-server"></use></svg>Receiver</a>
+        <a href="#" data-act="logfile"><svg class="i"><use href="#ic-file"></use></svg>Logfile</a>
+        <a href="#" data-act="config:scan"><svg class="i"><use href="#ic-pin"></use></svg>Map settings</a>
+        <div class="owx-dd-sep"></div>
+        <a href="screen.html" target="owxscreen" onclick="window.open('screen.html', 'owxscreen', 'width=700,height=600'); return false;"><svg class="i"><use href="#ic-gauge"></use></svg>Device Screen</a>
+        <a href="#" data-act="downloadfs"><svg class="i"><use href="#ic-down"></use></svg>Device FS</a>
+        <a href="#" data-act="reset"><svg class="i"><use href="#ic-history"></use></svg>Reset counters</a>
+      </div>
+    </div>
+    <button class="btn-owx about-btn-orange" type="button" id="navAbout">
+      <svg class="i"><use href="#ic-info"></use></svg> About
+    </button>
+    <span class="navbar-text-owx" id="navVersion">--</span>
+  </div>
+</nav>
+
+<div class="content-wrap">
+  <div class="map-pane">
+    <div id="map"></div>
+    <div class="owx-status-badge" id="statusBadge">Connecting</div>
+    <div class="owx-nomap" id="noMap" style="display:none;">
+      <h2>No map tiles</h2>
+      <p>
+        The map needs an internet connection for Leaflet and the tile server.
+        The device itself is reachable &mdash; sonde data is shown on the right,
+        and the <a href="index.html">dashboard</a> works without internet.
+      </p>
+    </div>
+  </div>
+
+  <div class="owx-sidebar">
+    <div class="section-header">
+      <svg class="i"><use href="#ic-chart"></use></svg> System Statistics
+    </div>
+    <div class="stats-grid">
+      <!-- Two tiles offer a choice of metric; the three-dot menu picks it and
+           the choice is kept in this browser. -->
+      <div class="stat-card">
+        <div class="tile-menu">
+          <button type="button" class="tile-dots" data-tile="sondes" title="Choose metric" aria-label="Choose metric">
+            <svg class="i"><use href="#ic-dots"></use></svg>
+          </button>
+          <div class="tile-pop" id="tilepop-sondes">
+            <a href="#" data-tile="sondes" data-metric="active"><svg class="i"><use href="#ic-rss"></use></svg>Active sondes</a>
+            <a href="#" data-tile="sondes" data-metric="total"><svg class="i"><use href="#ic-list"></use></svg>Total sondes</a>
+          </div>
+        </div>
+        <div class="stat-value" id="statSondes">0</div>
+        <div class="stat-label" id="statSondesLabel">Active sondes</div>
+      </div>
+      <div class="stat-card">
+        <div class="tile-menu">
+          <button type="button" class="tile-dots" data-tile="frames" title="Choose metric" aria-label="Choose metric">
+            <svg class="i"><use href="#ic-dots"></use></svg>
+          </button>
+          <div class="tile-pop" id="tilepop-frames">
+            <a href="#" data-tile="frames" data-metric="total"><svg class="i"><use href="#ic-list"></use></svg>Total frames</a>
+            <a href="#" data-tile="frames" data-metric="today"><svg class="i"><use href="#ic-calendar"></use></svg>Today&#39;s frames</a>
+          </div>
+        </div>
+        <div class="stat-value" id="statFrames">0</div>
+        <div class="stat-label" id="statFramesLabel">Total frames</div>
+      </div>
+      <!-- Two frequencies, and they mean different things: what the radio is
+           listening on right now, and where sondes have actually been heard. -->
+      <div class="stat-card" id="tileFreq">
+        <div class="freq-part">
+          <div class="stat-value small-font" id="statScanFreq">&ndash;</div>
+          <div class="stat-label" id="statScanLabel">Scanning</div>
+        </div>
+        <div class="freq-sep"></div>
+        <div class="freq-part">
+          <div class="stat-value small-font" id="statRxFreqs">&ndash;</div>
+          <div class="stat-label">Frequencies</div>
+        </div>
+      </div>
+      <div class="stat-card" id="tileLoad">
+        <div class="tile-menu">
+          <button type="button" class="tile-dots" data-tile="load" title="Choose view" aria-label="Choose view">
+            <svg class="i"><use href="#ic-dots"></use></svg>
+          </button>
+          <div class="tile-pop" id="tilepop-load">
+            <a href="#" data-tile="load" data-metric="live"><svg class="i"><use href="#ic-pulse"></use></svg>Live</a>
+            <a href="#" data-tile="load" data-metric="graph"><svg class="i"><use href="#ic-chart"></use></svg>Graph</a>
+          </div>
+        </div>
+        <div class="stat-value load-live" id="statLoad">
+          <span><i class="sw sw-cpu"></i>CPU <b id="statCpu">&ndash;</b></span>
+          <span><i class="sw sw-ram"></i>RAM <b id="statRam">&ndash;</b></span>
+        </div>
+        <div class="load-graph" id="loadGraph" hidden>
+          <canvas id="loadCanvas"></canvas>
+          <div class="load-tip" id="loadTip" hidden></div>
+        </div>
+        <div class="load-legend" id="loadLegend" hidden>
+          <span><i class="sw sw-cpu"></i>CPU <b id="legCpu">&ndash;</b></span>
+          <span><i class="sw sw-ram"></i>RAM <b id="legRam">&ndash;</b></span>
+          <span class="load-span" id="legSpan"></span>
+        </div>
+        <div class="stat-label" id="statLoadLabel">CPU / memory</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <svg class="i"><use href="#ic-rss"></use></svg> Active Radiosondes
+    </div>
+    <div class="sonde-list" id="sondeList">
+      <div class="no-sondes">Waiting for a radiosonde&hellip;</div>
+    </div>
+    <div class="sonde-list stored-list" id="storedList"></div>
+
+    <div class="section-header">
+      <svg class="i"><use href="#ic-heart"></use></svg> System Health
+    </div>
+    <div class="health-status" id="healthList"></div>
+
+    <div class="section-header">
+      <svg class="i"><use href="#ic-server"></use></svg> Receiver
+      <button type="button" class="btn-hdr" id="btnFreqRepo" title="Channels heard so far">
+        <svg class="i"><use href="#ic-list"></use></svg> Frequencies
+      </button>
+    </div>
+    <div class="rx-device" id="rxDevice"></div>
+  </div>
+</div>
+
+<!-- One shell for every dialogue; livemap.js fills in the title, body and
+     buttons. Six small modals sharing a frame beats six copies of it. -->
+<div class="owx-modal" id="modal" hidden>
+  <div class="owx-modal-back" data-close="1"></div>
+  <div class="owx-modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="owx-modal-head">
+      <h3 id="modalTitle">&nbsp;</h3>
+      <button type="button" class="owx-modal-x" data-close="1" aria-label="Close">&times;</button>
+    </div>
+    <div class="owx-modal-body" id="modalBody"></div>
+    <div class="owx-modal-foot" id="modalFoot"></div>
+  </div>
+</div>
+
+<div class="owx-toast" id="toast" hidden></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="livemap.js?v=8"></script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenWXDeck Dashboard</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+<div class="owx-container">
+
+  <div class="dashboard-header">
+    <div class="header-top">
+      <div>
+        <h1 class="dashboard-title">
+          <span class="openwx-open">Open</span><span class="openwx-wx">WX</span>
+          <span class="openwx-mark">
+            <svg class="i" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3ZM4.1 3.9 3 2.8a7.4 7.4 0 0 0 0 10.4l1.1-1.1a5.8 5.8 0 0 1 0-8.2Zm7.8 0a5.8 5.8 0 0 1 0 8.2l1.1 1.1a7.4 7.4 0 0 0 0-10.4l-1.1 1.1ZM6 5.8 4.9 4.7a4.7 4.7 0 0 0 0 6.6L6 10.2a3.1 3.1 0 0 1 0-4.4Zm4 0a3.1 3.1 0 0 1 0 4.4l1.1 1.1a4.7 4.7 0 0 0 0-6.6L10 5.8Z"/></svg>
+          </span>
+          <span class="openwx-deck">Deck</span>
+        </h1>
+        <p class="dashboard-subtitle">Handheld receiver &amp; recovery panel</p>
+      </div>
+      <div class="station-name">
+        <span id="version">--</span>
+        <small id="ipAddress">--</small>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <a class="btn-action btn-primary-action" href="livemap.html">
+        <svg class="i" viewBox="0 0 16 16"><path d="M15.8 1.6a.5.5 0 0 0-.5 0L10.5 4 5.7 1.6a.5.5 0 0 0-.4 0L.3 4a.5.5 0 0 0-.3.5v10a.5.5 0 0 0 .7.4L5.5 12.6l4.8 2.4a.5.5 0 0 0 .4 0l5-2.5a.5.5 0 0 0 .3-.5v-10a.5.5 0 0 0-.2-.4ZM5 3.3v8.1L1.2 13.3V5.2L5 3.3Zm5.5 1.4v8.1L6 10.6V2.5l4.5 2.2Zm4.3 6.6L11 13.2V5.1l3.8-1.9v8.1Z"/></svg>
+        Map View
+      </a>
+      <a class="btn-action" href="screen.html" target="owxscreen"
+         onclick="window.open('screen.html', 'owxscreen', 'width=700,height=600'); return false;">
+        <svg class="i" viewBox="0 0 16 16"><path d="M1 2h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H9.5v1.5H12V15H4v-1.5h2.5V12H1a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Zm.5 1.5v7h13v-7h-13Z"/></svg>
+        Screen
+      </a>
+      <a class="btn-action" href="#receiver">
+        <svg class="i" viewBox="0 0 16 16"><path d="M0 11h3v5H0v-5Zm4.5-4H7v9H4.5V7ZM9 2h2.5v14H9V2Zm4.5 6H16v8h-2.5V8Z"/></svg>
+        Receiver
+      </a>
+      <a class="btn-action" href="#sondes">
+        <svg class="i" viewBox="0 0 16 16"><path d="M4 0h5.5L14 4.5V15a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V1a1 1 0 0 1 1-1Zm5 1.5V5h3.5L9 1.5ZM5 7h6v1.2H5V7Zm0 3h6v1.2H5V10Z"/></svg>
+        Decoded
+      </a>
+      <button class="btn-action about-btn-orange" type="button" onclick="toggleAbout()">
+        <svg class="i" viewBox="0 0 16 16"><path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0Zm.9 12H7.1V7h1.8v5Zm0-6.4H7.1V4h1.8v1.6Z"/></svg>
+        About
+      </button>
+      <button class="btn-action" type="button" onclick="refresh()">
+        <svg class="i" viewBox="0 0 16 16"><path d="M8 3V0L4 4l4 4V5a4 4 0 1 1-4 4H2a6 6 0 1 0 6-6Z"/></svg>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <div class="feedback" id="feedback"></div>
+
+  <div class="section-card" id="aboutCard" style="display:none;">
+    <div class="section-title">About</div>
+    <div class="info-row"><div class="info-label">Firmware</div><div class="info-value">OpenWXDeck <span id="aboutVersion">--</span></div></div>
+    <div class="info-row"><div class="info-label">Hardware</div><div class="info-value">LilyGO T-Deck Plus &middot; SX1262</div></div>
+    <div class="info-row"><div class="info-label">Decoders</div><div class="info-value" id="aboutDecoders">RS41</div></div>
+    <div class="info-row"><div class="info-label">Based on</div><div class="info-value">rs1729 decoders</div></div>
+    <div class="info-row"><div class="info-label">Web assets</div><div class="info-value" id="aboutAssets">--</div></div>
+    <div class="info-row"><div class="info-label">Channel list</div><div class="info-value" id="aboutChannels">--</div></div>
+  </div>
+
+  <div class="stats-overview">
+    <div class="stat-card">
+      <span class="stat-icon"><svg class="i" viewBox="0 0 16 16"><path d="M8 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3ZM4.1 3.9 3 2.8a7.4 7.4 0 0 0 0 10.4l1.1-1.1a5.8 5.8 0 0 1 0-8.2Zm7.8 0a5.8 5.8 0 0 1 0 8.2l1.1 1.1a7.4 7.4 0 0 0 0-10.4l-1.1 1.1Z"/></svg></span>
+      <div class="stat-value small" id="statSonde">&ndash;</div>
+      <div class="stat-label">Active sonde</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon"><svg class="i" viewBox="0 0 16 16"><path d="M0 11h3v5H0v-5Zm4.5-4H7v9H4.5V7ZM9 2h2.5v14H9V2Zm4.5 6H16v8h-2.5V8Z"/></svg></span>
+      <div class="stat-value" id="statFrames">0</div>
+      <div class="stat-label">Frames decoded</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon"><svg class="i" viewBox="0 0 16 16"><path d="M8 0 6.2 6.2 0 8l6.2 1.8L8 16l1.8-6.2L16 8 9.8 6.2 8 0Z"/></svg></span>
+      <div class="stat-value" id="statRange">&ndash;</div>
+      <div class="stat-label">Range to sonde</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon"><svg class="i" viewBox="0 0 16 16"><path d="M1 4h11a1 1 0 0 1 1 1v1h1.5a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-.5.5H13v1a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm1 2v4h9V6H2Z"/></svg></span>
+      <div class="stat-value" id="statBattery">&ndash;</div>
+      <div class="stat-label">Battery</div>
+    </div>
+  </div>
+
+  <div class="section-card" id="receiver">
+    <div class="section-title">
+      <svg class="i" viewBox="0 0 16 16"><path d="M8 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3ZM4.1 3.9 3 2.8a7.4 7.4 0 0 0 0 10.4l1.1-1.1a5.8 5.8 0 0 1 0-8.2Zm7.8 0a5.8 5.8 0 0 1 0 8.2l1.1 1.1a7.4 7.4 0 0 0 0-10.4l-1.1 1.1Z"/></svg>
+      Receiver
+    </div>
+    <div class="receiver-card" id="receiverCard">
+      <div class="receiver-header">
+        <span class="receiver-name">SX1262</span>
+        <span class="receiver-status status-idle" id="receiverStatus">WAITING</span>
+      </div>
+      <div id="receiverRows"></div>
+
+      <div class="manual-block">
+        <div class="manual-label">Manual tune</div>
+        <div class="manual-grid">
+          <div>
+            <label class="field-label" for="manualMHz">Frequency (MHz)</label>
+            <input id="manualMHz" inputmode="decimal" placeholder="405.700">
+          </div>
+          <div>
+            <label class="field-label" for="countrySelect">Country</label>
+            <select id="countrySelect" onchange="ctrl('set_country',{country:this.value},this)"></select>
+          </div>
+          <button class="btn-go" type="button"
+                  onclick="ctrl('set_manual_freq',{mhz:document.getElementById('manualMHz').value},this)">Set</button>
+        </div>
+        <div class="panel-actions">
+          <button class="btn-action" type="button" onclick="ctrl('prev_freq',{},this)">Previous</button>
+          <button class="btn-action" type="button" onclick="ctrl('next_freq',{},this)">Next</button>
+          <button class="btn-action" type="button" id="scanButton" onclick="ctrl('toggle_scan',{},this)">Scan</button>
+          <button class="btn-action" type="button" id="sourceButton" onclick="ctrl('toggle_source',{},this)">Mode</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">
+      <svg class="i" viewBox="0 0 16 16"><path d="M8 4.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm6.4 3.5c0 .4 0 .7-.1 1l1.4 1.1c.1.1.2.3 0 .5l-1.3 2.3c-.1.2-.3.2-.5.1l-1.6-.6c-.4.3-.8.5-1.2.7l-.3 1.7c0 .2-.2.3-.4.3H7.6c-.2 0-.3-.1-.4-.3l-.3-1.7c-.4-.2-.8-.4-1.2-.7l-1.6.6c-.2.1-.4 0-.5-.1L2.3 10.6c-.1-.2-.1-.4 0-.5L3.7 9a5.6 5.6 0 0 1 0-2L2.3 5.9c-.1-.1-.2-.3 0-.5l1.3-2.3c.1-.2.3-.2.5-.1l1.6.6c.4-.3.8-.5 1.2-.7l.3-1.7c.1-.2.2-.3.4-.3h2.8c.2 0 .4.1.4.3l.3 1.7c.4.2.8.4 1.2.7l1.6-.6c.2-.1.4 0 .5.1l1.3 2.3c.1.2.1.4 0 .5L14.3 7c.1.3.1.6.1 1Z"/></svg>
+      Configuration
+    </div>
+    <div class="config-grid" id="configGrid"></div>
+    <div class="controls-grid" id="deviceControls"></div>
+  </div>
+
+  <div class="section-card" id="sondes">
+    <div class="section-title">
+      <svg class="i" viewBox="0 0 16 16"><path d="M8 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3ZM4.1 3.9 3 2.8a7.4 7.4 0 0 0 0 10.4l1.1-1.1a5.8 5.8 0 0 1 0-8.2Zm7.8 0a5.8 5.8 0 0 1 0 8.2l1.1 1.1a7.4 7.4 0 0 0 0-10.4l-1.1 1.1Z"/></svg>
+      Decoded radiosonde
+    </div>
+    <div class="table-wrap">
+      <table class="sondes-table">
+        <thead>
+          <tr>
+            <th>Sonde ID</th><th>Type</th><th>Frequency</th><th>Altitude</th>
+            <th>Position</th><th>Range</th><th>Bearing</th><th>Frames</th><th>Last update</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="sondesBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title">
+      <svg class="i" viewBox="0 0 16 16"><path d="M8 12.5a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4Zm0-3.6c1 0 2 .4 2.7 1.1l1.3-1.4A6 6 0 0 0 8 6.9a6 6 0 0 0-4 1.7l1.3 1.4A3.8 3.8 0 0 1 8 8.9Zm0-4.1c2 0 3.9.8 5.3 2.1l1.3-1.4A9.2 9.2 0 0 0 8 2.9a9.2 9.2 0 0 0-6.6 2.6l1.3 1.4A7.5 7.5 0 0 1 8 4.8Z"/></svg>
+      Wi-Fi
+    </div>
+    <div class="manual-grid">
+      <div>
+        <label class="field-label" for="wifiSsid">SSID</label>
+        <input id="wifiSsid" placeholder="SSID">
+      </div>
+      <div>
+        <label class="field-label" for="wifiPass">Password</label>
+        <input id="wifiPass" type="password" placeholder="Password">
+      </div>
+      <button class="btn-go" type="button"
+              onclick="ctrl('set_wifi',{ssid:document.getElementById('wifiSsid').value,pass:document.getElementById('wifiPass').value},this)">Save</button>
+    </div>
+    <p class="dashboard-subtitle" style="font-size:13px;margin-top:12px;">
+      Changing Wi-Fi may disconnect this page until the device joins the new network.
+      Credentials are stored on the device, not in this page.
+    </p>
+  </div>
+
+  <div class="update-time" id="updateTime">&nbsp;</div>
+  <div class="owx-footer">
+    OpenWXDeck &middot; radio capture and decoding keep priority over this panel
+  </div>
+</div>
+
+<script src="openwx.js?v=2"></script>
+</body>
+</html>

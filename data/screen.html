@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenWXDeck - Device screen</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #101418; color: #d8dee6; font: 14px system-ui, sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 12px;
+           background: #1a2129; border-bottom: 1px solid #2c3642; }
+  header h1 { font-size: 15px; margin: 0 12px 0 0; font-weight: 600; }
+  button, select { background: #26303b; color: #e6ebf0; border: 1px solid #3a4652; border-radius: 6px;
+                   padding: 5px 10px; font: inherit; cursor: pointer; }
+  button:hover { background: #303c49; }
+  button.on { background: #1d5d2f; border-color: #2f8a48; }
+  label { display: inline-flex; gap: 6px; align-items: center; }
+  main { padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  #frame { border: 1px solid #2c3642; background: #000; line-height: 0; }
+  #screen { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+  #state { color: #8d99a6; min-height: 1.2em; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Device screen</h1>
+  <button id="refresh" type="button">Refresh</button>
+  <button id="live" type="button">Live: off</button>
+  <label>every
+    <select id="interval">
+      <option value="1000">1 s</option>
+      <option value="2000" selected>2 s</option>
+      <option value="5000">5 s</option>
+      <option value="10000">10 s</option>
+    </select>
+  </label>
+  <label>scale
+    <select id="scale">
+      <option value="1">1x</option>
+      <option value="2" selected>2x</option>
+      <option value="3">3x</option>
+    </select>
+  </label>
+  <button id="shot" type="button">Screenshot (PNG)</button>
+</header>
+<main>
+  <div id="frame"><canvas id="screen" width="320" height="240"></canvas></div>
+  <div id="state">Loading...</div>
+</main>
+<script>
+// The T-Deck's screen, read back from its display (GET /api/screen): runs of
+// RGB565 pixels, decoded into the canvas here. Screenshots are made by the
+// browser from the canvas; nothing is stored on the device. Each capture
+// holds the device's loop for a moment, so Live defaults to every 2 s and
+// stops while this tab is hidden.
+(function () {
+  const canvas = document.getElementById('screen');
+  const ctx = canvas.getContext('2d');
+  const state = document.getElementById('state');
+  const liveBtn = document.getElementById('live');
+  const interval = document.getElementById('interval');
+  const scale = document.getElementById('scale');
+  let live = false;
+  let timer = null;
+  let loading = false;
+  let haveImage = false;
+
+  function applyScale() {
+    const s = Number(scale.value);
+    canvas.style.width = (320 * s) + 'px';
+    canvas.style.height = (240 * s) + 'px';
+  }
+
+  function stamp() {
+    const d = new Date();
+    const p = (n) => String(n).padStart(2, '0');
+    return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' +
+           p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+  }
+
+  // "OWXS", u16 width, u16 height, then (u16 count, u16 RGB565) runs.
+  function decode(buffer) {
+    const view = new DataView(buffer);
+    if (buffer.byteLength < 8 ||
+        String.fromCharCode(view.getUint8(0), view.getUint8(1), view.getUint8(2), view.getUint8(3)) !== 'OWXS') {
+      throw new Error('not a screen image (' + buffer.byteLength + ' bytes)');
+    }
+    const width = view.getUint16(4, true);
+    const height = view.getUint16(6, true);
+    const image = ctx.createImageData(width, height);
+    const px = image.data;
+    let at = 0;
+    let runs = 0;
+    for (let off = 8; off + 4 <= buffer.byteLength; off += 4) {
+      const count = view.getUint16(off, true);
+      const c = view.getUint16(off + 2, true);
+      const r = ((c >> 11) & 0x1f) * 255 / 31;
+      const g = ((c >> 5) & 0x3f) * 255 / 63;
+      const b = (c & 0x1f) * 255 / 31;
+      for (let k = 0; k < count && at < px.length; k++) {
+        px[at++] = r; px[at++] = g; px[at++] = b; px[at++] = 255;
+      }
+      runs++;
+    }
+    if (at < px.length) {
+      throw new Error('image incomplete (' + (at / 4) + ' of ' + (width * height) + ' pixels)');
+    }
+    canvas.width = width;
+    canvas.height = height;
+    ctx.putImageData(image, 0, 0);
+    return { runs: runs, bytes: buffer.byteLength };
+  }
+
+  async function load() {
+    if (loading) { return; }
+    loading = true;
+    const started = performance.now();
+    try {
+      let res = null;
+      // 503: the device has just started its screen copy and redraws the
+      // page into it; ask again shortly.
+      for (let attempt = 0; attempt < 6; attempt++) {
+        res = await fetch('/api/screen?t=' + Date.now(), { cache: 'no-store' });
+        if (res.status !== 503) { break; }
+        state.textContent = 'Starting screen copy on the device...';
+        await new Promise((resolve) => setTimeout(resolve, 700));
+      }
+      if (!res.ok) { throw new Error('HTTP ' + res.status); }
+      const info = decode(await res.arrayBuffer());
+      haveImage = true;
+      let text = 'Updated ' + new Date().toLocaleTimeString() + ' (' +
+        Math.round(performance.now() - started) + ' ms, ' + Math.round(info.bytes / 1024) + ' kB)';
+      if (info.runs <= 1) {
+        text += ' - the screen came back in one colour: this display may not support reading back.';
+      }
+      state.textContent = text;
+    } catch (err) {
+      state.textContent = 'Could not read the screen: ' + err.message;
+    }
+    loading = false;
+    schedule();
+  }
+
+  function schedule() {
+    clearTimeout(timer);
+    if (live && !document.hidden) {
+      timer = setTimeout(load, Number(interval.value));
+    }
+  }
+
+  document.getElementById('refresh').addEventListener('click', load);
+
+  liveBtn.addEventListener('click', () => {
+    live = !live;
+    liveBtn.textContent = 'Live: ' + (live ? 'on' : 'off');
+    liveBtn.classList.toggle('on', live);
+    if (live) { load(); } else { clearTimeout(timer); }
+  });
+
+  interval.addEventListener('change', schedule);
+  scale.addEventListener('change', applyScale);
+  document.addEventListener('visibilitychange', schedule);
+
+  // The canvas as it is, 320 x 240, saved as PNG by the browser.
+  document.getElementById('shot').addEventListener('click', () => {
+    if (!haveImage) { state.textContent = 'No image yet.'; return; }
+    canvas.toBlob((blob) => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'openwxdeck-' + stamp() + '.png';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }, 'image/png');
+  });
+
+  applyScale();
+  load();
+})();
+</script>
+</body>
+</html>

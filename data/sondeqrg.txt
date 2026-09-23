@@ -1,0 +1,26 @@
+# OpenWXDeck channel list
+#
+# One launch site per line:
+#   country  frequency(MHz)  site-code  site name
+#
+# site-code is the WMO station number, or - when the site has none.
+# The site name is the rest of the line, so spaces are fine.
+#
+# Edit this file and run `pio run -t uploadfs` - no firmware rebuild needed.
+
+DE   402.300   10548   Meiningen
+DE   402.500   10035   Schleswig
+DE   402.700   10618   Idar-Oberstein
+DE   404.100   10113   Norderney
+DE   404.500   10304   Meppen
+DE   405.100   10304   Meppen II
+DE   405.100   10393   Lindenberg
+DE   405.300   10410   Essen
+DE   405.700   10238   Bergen
+DE   405.900   10238   Bergen 2
+
+FR   404.000   07110   Brest
+
+NL   404.900   06260   De Bilt
+
+# end
